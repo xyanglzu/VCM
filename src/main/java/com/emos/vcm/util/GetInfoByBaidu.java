@@ -1,13 +1,14 @@
-package com.emos.vcm.dataprocess;
+package com.emos.vcm.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GetLatAndLngByBaidu {
+public class GetInfoByBaidu {
 
     /**
      * 返回输入地址的经纬度坐标
@@ -19,7 +20,7 @@ public class GetLatAndLngByBaidu {
     public static void main(String args[]) {
 
         String cnAddress = "四川省凉山州西昌市四川凉山州西昌市安宁镇机场路3段238号";
-        Map<String, String> map = GetLatAndLngByBaidu.getLatitude(cnAddress);
+        Map<String, String> map = getLatitude(cnAddress);
         if (null != map) {
             System.out.println(cnAddress + "    经度:" + map.get("lng") + "    纬度:" + map.get("lat"));
         } else {
@@ -62,5 +63,36 @@ public class GetLatAndLngByBaidu {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static double getTravelDistance(double lat1, double lng1, double lat2, double lng2) throws IOException {
+        double result;
+        String str = "http://api.map.baidu.com/routematrix/v2/driving?output=json&origins="
+                + lat1 + "," + lng1 + "&destinations=" + lat2 + "," + lng2 + "&ak=" + AK;
+        URL resjson = new URL(str);
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(resjson.openStream()));
+        String res;
+        StringBuilder sb = new StringBuilder("");
+        while ((res = in.readLine()) != null) {
+            sb.append(res.trim());
+        }
+        in.close();
+        String string = sb.toString();
+
+        if (string != null) {
+            int distanceStart = string.indexOf("distance\":{\"text\":");
+            int distanceEnd = string.indexOf(",\"value", distanceStart);
+
+            if (distanceStart > 0 && distanceEnd > 0) {
+                String distance = string.substring(distanceStart + 18 + 1, distanceEnd - 3);
+                result = Double.parseDouble(distance);
+            } else {
+                result = 0;
+            }
+        } else {
+            result = 0;
+        }
+        return result;
     }
 }

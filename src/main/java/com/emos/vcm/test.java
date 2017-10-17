@@ -1,12 +1,6 @@
 package com.emos.vcm;
 
-import com.emos.vcm.util.ExcelProcess;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.emos.vcm.util.GetInfoByBaidu;
 
 
 public class test {
@@ -35,13 +29,20 @@ public class test {
 //        SimpleMatrix SZA = SimpleMatrix.identity(10).scale(10);
 //
 //        System.out.print("test");
+//        try {
+//            InputStream in = new FileInputStream("./data/订单.xls");
+//            HSSFWorkbook wb = new HSSFWorkbook(in);
+//            HSSFSheet sheet = wb.getSheetAt(0);
+//            int i = ExcelProcess.getTitleIndexOfSheet(sheet, "客户要求提货时间");
+//            double a = sheet.getRow(1).getCell(i).getNumericCellValue();
+//            System.out.println(1);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         try {
-            InputStream in = new FileInputStream("./data/订单.xls");
-            HSSFWorkbook wb = new HSSFWorkbook(in);
-            HSSFSheet sheet = wb.getSheetAt(0);
-
-            System.out.println(ExcelProcess.getTitleIndexOfSheet(sheet, "货物体积(方)"));
-        } catch (IOException e) {
+            double a = GetInfoByBaidu.getTravelDistance(40.45, 116.34, 40.34, 116.34);
+            System.out.println(a);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
