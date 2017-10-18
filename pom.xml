@@ -88,6 +88,29 @@
             <artifactId>ejml</artifactId>
             <version>0.25</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.ejml/ejml-core -->
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-core</artifactId>
+            <version>0.32</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.ejml/ejml-ddense -->
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-ddense</artifactId>
+            <version>0.32</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.ejml/ejml-dsparse -->
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-dsparse</artifactId>
+            <version>0.32</version>
+        </dependency>
+
+
         <!--ejml-end-->
 
     </dependencies>

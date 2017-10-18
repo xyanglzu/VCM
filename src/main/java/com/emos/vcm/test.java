@@ -1,6 +1,6 @@
 package com.emos.vcm;
 
-import com.emos.vcm.util.GetInfoByBaidu;
+import org.ejml.simple.SimpleMatrix;
 
 
 public class test {
@@ -39,11 +39,30 @@ public class test {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        try {
-            double a = GetInfoByBaidu.getTravelDistance(40.45, 116.34, 40.34, 116.34);
-            System.out.println(a);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+
+//        try {
+//            double a = GetInfoByBaidu.getTravelDistance(40.45, 116.34, 40.34, 116.34);
+//            System.out.println(a);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+//        double[] t = {1,2,3,4,5,6,7,8};
+//        int rowNum = 2;
+//        int colNum = 4;
+//        double[][] tmp = new double[rowNum][colNum];
+//        for (int i = 0; i < rowNum; i++) {
+//            System.arraycopy(t, i*colNum, tmp[i], 0, colNum);
+//        }
+//        SimpleMatrix tmpa = new SimpleMatrix(tmp);
+//        tmpa.print();
+
+        double[][] t = {{1, 2, 3}, {4, 5, 6}};
+        SimpleMatrix a = new SimpleMatrix(t);
+
+        a.print();
+        a.scale(3).print();
+
     }
 }

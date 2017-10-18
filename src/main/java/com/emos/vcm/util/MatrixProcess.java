@@ -22,4 +22,33 @@ public class MatrixProcess {
         }
         return result;
     }
+
+    public static SimpleMatrix elementDiv(SimpleMatrix matrix1, SimpleMatrix matrix2) {
+        if (matrix1.numRows() == matrix2.numRows() && matrix1.numCols() == matrix2.numCols()) {
+            int numRow = matrix1.numRows();
+            int numCol = matrix1.numCols();
+            SimpleMatrix result = new SimpleMatrix(numRow, numCol);
+
+            for (int i = 0; i < numRow; i++) {
+                for (int j = 0; j < numCol; j++) {
+                    result.set(i, j, matrix1.get(i, j) / matrix2.get(i, j));
+                }
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    public static SimpleMatrix oneArrayToMatrix(double[] array, int rowNum, int colNum) {
+        if (rowNum * colNum == array.length) {
+            double[][] tmp = new double[rowNum][colNum];
+            for (int i = 0; i < rowNum; i++) {
+                System.arraycopy(array, i * colNum, tmp[i], 0, colNum);
+            }
+            return new SimpleMatrix(tmp);
+        } else {
+            return null;
+        }
+    }
 }

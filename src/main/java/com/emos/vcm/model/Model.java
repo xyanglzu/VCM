@@ -28,8 +28,48 @@ public class Model {
     private SimpleMatrix delayTime;          // 车到达送货点后延误时间矩阵
 
 
-    public Model() {
+    public Model(HSSFSheet ordersGroupSheet, HSSFSheet vehicleGroupSheet, int i) {
+        vNum = ExcelProcess.getRealNumberOfRow(vehicleGroupSheet) - 1;  // 去掉标题
+        cNum = ExcelProcess.getRealNumberOfRow(ordersGroupSheet) - 1;   // 去掉标题
+        vehicles = new ArrayList<Vehicle>();
+        cargos = new ArrayList<Cargo>();
+        vcDistance = new SimpleMatrix(vNum, cNum);
+        deliveryDistance = new SimpleMatrix(1, cNum);
+        waitTime = new SimpleMatrix(vNum, cNum);
+        delayTime = new SimpleMatrix(vNum, cNum);
 
+        int rankIndex = ExcelProcess.getTitleIndexOfSheet(vehicleGroupSheet, "排名");
+        int gpsUpTimeIndex = ExcelProcess.getTitleIndexOfSheet(vehicleGroupSheet, "GPS上传时间");
+        int vehicleLatIndex = ExcelProcess.getTitleIndexOfSheet(vehicleGroupSheet, "车辆位置维度");
+        int vehicleLngIndex = ExcelProcess.getTitleIndexOfSheet(vehicleGroupSheet, "车辆位置经度");
+        int vehicleWeightIndex = ExcelProcess.getTitleIndexOfSheet(vehicleGroupSheet, "最大载重");
+        int vehicleVolumeIndex = ExcelProcess.getTitleIndexOfSheet(vehicleGroupSheet, "最大体积");
+
+        for (int v = 1; v <= vNum; v++) {
+            HSSFRow row = vehicleGroupSheet.getRow(v);    // 跳过标题
+            Vehicle vehicle = new Vehicle((int) row.getCell(rankIndex).getNumericCellValue(), row.getCell(gpsUpTimeIndex).getDateCellValue(),
+                    row.getCell(vehicleLatIndex).getNumericCellValue(), row.getCell(vehicleLngIndex).getNumericCellValue(),
+                    row.getCell(vehicleWeightIndex).getNumericCellValue(), row.getCell(vehicleVolumeIndex).getNumericCellValue());
+            vehicles.add(vehicle);
+        }
+
+        int cargoVolumeIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "货物体积(方)");
+        int cargoWeightIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "货物重量(T)");
+        int pickupTimeIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "客户要求提货时间");
+        int deliveryTimeIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "客户要求到货时间");
+        int pickupLatIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "发货地址维度");
+        int pickupLngIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "发货地址经度");
+        int deliveryLatIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "收货地址维度");
+        int deliveryLngIndex = ExcelProcess.getTitleIndexOfSheet(ordersGroupSheet, "收货地址经度");
+
+        for (int c = 1; c <= cNum; c++) {
+            HSSFRow row = ordersGroupSheet.getRow(c);     // 跳过标题
+            Cargo cargo = new Cargo(row.getCell(cargoVolumeIndex).getNumericCellValue(), row.getCell(cargoWeightIndex).getNumericCellValue(),
+                    row.getCell(pickupTimeIndex).getDateCellValue(), row.getCell(deliveryTimeIndex).getDateCellValue(),
+                    row.getCell(pickupLatIndex).getNumericCellValue(), row.getCell(pickupLngIndex).getNumericCellValue(),
+                    row.getCell(deliveryLatIndex).getNumericCellValue(), row.getCell(deliveryLngIndex).getNumericCellValue());
+            cargos.add(cargo);
+        }
     }
 
     public Model(HSSFSheet ordersGroupSheet, HSSFSheet vehicleGroupSheet) throws Exception {
@@ -128,27 +168,6 @@ public class Model {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Date a = new Date();
-            InputStream vehicleIn = new FileInputStream("./data/车辆.xls");
-            InputStream cargoIn = new FileInputStream(new File("./data/订单.xls"));
-            HSSFWorkbook vehicleWb = new HSSFWorkbook(vehicleIn);
-            HSSFWorkbook cargoWb = new HSSFWorkbook(cargoIn);
-            HSSFSheet vehicleSheet = vehicleWb.getSheetAt(0);
-            HSSFSheet cargoSheet = cargoWb.getSheetAt(0);
-
-            Model model = new Model(cargoSheet, vehicleSheet);
-            model.saveMatrix();
-
-            Date b = new Date();
-
-            System.out.println((b.getTime() - a.getTime()) / 1000.0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public ArrayList<Vehicle> getVehicles() {
         return vehicles;
     }
@@ -197,6 +216,39 @@ public class Model {
         this.delayTime = delayTime;
     }
 
+    public static void main(String[] args) {
+        try {
+            Date a = new Date();
+            InputStream vehicleIn = new FileInputStream("./data/车辆.xls");
+            InputStream cargoIn = new FileInputStream(new File("./data/订单.xls"));
+            HSSFWorkbook vehicleWb = new HSSFWorkbook(vehicleIn);
+            HSSFWorkbook cargoWb = new HSSFWorkbook(cargoIn);
+            HSSFSheet vehicleSheet = vehicleWb.getSheetAt(0);
+            HSSFSheet cargoSheet = cargoWb.getSheetAt(0);
+
+            Model model = new Model(cargoSheet, vehicleSheet);
+            model.saveMatrix();
+
+            Date b = new Date();
+
+            System.out.println((b.getTime() - a.getTime()) / 1000.0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getvNum() {
+        return vNum;
+    }
+
+    public void setvNum(int vNum) {
+        this.vNum = vNum;
+    }
+
+    public int getcNum() {
+        return cNum;
+    }
+
     public void saveMatrix() throws IOException {
         String pathname1 = "./data/vcDistance.csv";
         vcDistance.saveToFileCSV(pathname1);
@@ -218,4 +270,9 @@ public class Model {
         String pathname4 = "./data/delayTime.csv";
         delayTime = new SimpleMatrix(MatrixIO.loadCSV(pathname4));
     }
+
+    public void setcNum(int cNum) {
+        this.cNum = cNum;
+    }
+
 }
