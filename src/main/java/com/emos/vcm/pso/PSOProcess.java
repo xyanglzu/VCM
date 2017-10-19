@@ -72,11 +72,6 @@ public class PSOProcess implements PSOConstants {
                 double[] newLoc = new double[model.getvNum() * model.getcNum()];
                 for (int j = 0; j < newLoc.length; j++) {
                     newLoc[i] = p.getLocation().getLoc()[i] + newVel[i];
-                    if (newLoc[j] > 0.5) {
-                        newLoc[j] = 1;
-                    } else {
-                        newLoc[j] = 0;
-                    }
                 }
                 Location loc = new Location(newLoc);
                 p.setLocation(loc);
@@ -114,11 +109,6 @@ public class PSOProcess implements PSOConstants {
 
             for (int j = 0; j < loc.length; j++) {
                 loc[j] = ProblemSet.LOC_LOW + generator.nextDouble() * (ProblemSet.LOC_HIGH - ProblemSet.LOC_LOW);
-                if (loc[j] > 0.5) {
-                    loc[j] = 1;
-                } else {
-                    loc[j] = 0;
-                }
             }
 
             Location location = new Location(loc);

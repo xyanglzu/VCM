@@ -44,7 +44,13 @@ public class MatrixProcess {
         if (rowNum * colNum == array.length) {
             double[][] tmp = new double[rowNum][colNum];
             for (int i = 0; i < rowNum; i++) {
-                System.arraycopy(array, i * colNum, tmp[i], 0, colNum);
+                for (int j = 0; j < colNum; j++) {
+                    if (array[i * colNum + j] > 0.5) {
+                        tmp[i][j] = 1;
+                    } else {
+                        tmp[i][j] = 0;
+                    }
+                }
             }
             return new SimpleMatrix(tmp);
         } else {

@@ -38,7 +38,13 @@ public class ProblemSet {
         if (rowNum * colNum == location.getLoc().length) {
             double[][] tmp = new double[rowNum][colNum];
             for (int i = 0; i < rowNum; i++) {
-                System.arraycopy(location.getLoc(), i * colNum, tmp[i], 0, colNum);
+                for (int j = 0; j < colNum; j++) {
+                    if (location.getLoc()[i * colNum + j] > 0.5) {
+                        tmp[i][j] = 1;
+                    } else {
+                        tmp[i][j] = 0;
+                    }
+                }
             }
             SimpleMatrix locationMatrix = new SimpleMatrix(tmp);
 
