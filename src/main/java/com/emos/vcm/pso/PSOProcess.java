@@ -5,7 +5,6 @@ package com.emos.vcm.pso;
 // but you can easily modify it to solve higher dimensional space problem
 
 import com.emos.vcm.model.Model;
-import com.emos.vcm.util.MatrixProcess;
 import org.ejml.simple.SimpleMatrix;
 
 import java.util.Random;
@@ -20,7 +19,7 @@ public class PSOProcess implements PSOConstants {
     private Location gBestLocation;
     private double[] fitnessValueList = new double[SWARM_SIZE];
 
-    public void execute(Model model) {
+    public double[] execute(Model model) {
         initializeSwarm(model);
         updateFitnessList(model);
 
@@ -59,19 +58,25 @@ public class PSOProcess implements PSOConstants {
                 Particle p = swarm.get(i);
 
                 // step 3 - update velocity
-                double[] newVel = new double[model.getvNum() * model.getcNum()];
+                double[] newVel = new double[model.getcNum()];
                 for (int j = 0; j < newVel.length; j++) {
-                    newVel[j] = (w * p.getVelocity().getPos()[i]) +
-                            (r1 * C1) * (pBestLocation.get(i).getLoc()[i] - p.getLocation().getLoc()[i]) +
-                            (r2 * C2) * (gBestLocation.getLoc()[i] - p.getLocation().getLoc()[i]);
+                    newVel[j] = (w * p.getVelocity().getPos()[j]) +
+                            (r1 * C1) * (pBestLocation.get(i).getLoc()[j] - p.getLocation().getLoc()[j]) +
+                            (r2 * C2) * (gBestLocation.getLoc()[j] - p.getLocation().getLoc()[j]);
                 }
                 Velocity vel = new Velocity(newVel);
                 p.setVelocity(vel);
 
                 // step 4 - update location
-                double[] newLoc = new double[model.getvNum() * model.getcNum()];
+                double[] newLoc = new double[model.getcNum()];
                 for (int j = 0; j < newLoc.length; j++) {
-                    newLoc[i] = p.getLocation().getLoc()[i] + newVel[i];
+                    newLoc[j] = p.getLocation().getLoc()[j] + newVel[j];
+                    if (newLoc[j] > model.getvNum()) {
+                        newLoc[j] = model.getvNum();
+                    }
+                    if (newLoc[j] < 0) {
+                        newLoc[j] = 0;
+                    }
                 }
                 Location loc = new Location(newLoc);
                 p.setLocation(loc);
@@ -80,7 +85,7 @@ public class PSOProcess implements PSOConstants {
             err = ProblemSet.evaluate(gBestLocation, model) - 0; // minimizing the functions means it's getting closer to 0
 
             double[] gBestArray = gBestLocation.getLoc();
-            SimpleMatrix gBestMatrix = MatrixProcess.oneArrayToMatrix(gBestArray, model.getvNum(), model.getcNum());
+            SimpleMatrix gBestMatrix = PSOUtility.particleToMatrix(gBestArray, model.getvNum(), model.getcNum());
             System.out.println("ITERATION " + t + ": ");
             gBestMatrix.print();
             System.out.println("     Error: " + err);
@@ -92,11 +97,15 @@ public class PSOProcess implements PSOConstants {
         }
 
         double[] gBestArray = gBestLocation.getLoc();
-        SimpleMatrix gBestMatrix = MatrixProcess.oneArrayToMatrix(gBestArray, model.getvNum(), model.getcNum());
+        SimpleMatrix gBestMatrix = new SimpleMatrix(1, gBestArray.length);
+        for (int i = 0; i < gBestArray.length; i++) {
+            gBestMatrix.set(0, i, Math.floor(gBestArray[i]));
+        }
         System.out.println("\nSolution found at iteration " + (t - 1) + ", the solutions is:");
         gBestMatrix.print();
         System.out.println("     Error: " + err);
         System.out.println("     Value: " + ProblemSet.evaluate(gBestLocation, model));
+        return gBestArray;
     }
 
     public void initializeSwarm(Model model) {
@@ -105,16 +114,16 @@ public class PSOProcess implements PSOConstants {
             p = new Particle();
 
             // randomize location inside a space defined in Problem Set
-            double[] loc = new double[model.getvNum() * model.getcNum()];
+            double[] loc = new double[model.getcNum()];
 
             for (int j = 0; j < loc.length; j++) {
-                loc[j] = ProblemSet.LOC_LOW + generator.nextDouble() * (ProblemSet.LOC_HIGH - ProblemSet.LOC_LOW);
+                loc[j] = 0 + generator.nextDouble() * (model.getvNum() + 1 - 0);
             }
 
             Location location = new Location(loc);
 
             // randomize velocity in the range defined in Problem Set
-            double[] vel = new double[model.getvNum() * model.getcNum()];
+            double[] vel = new double[model.getcNum()];
 
             for (int j = 0; j < vel.length; j++) {
                 vel[j] = ProblemSet.VEL_LOW + generator.nextDouble() * (ProblemSet.VEL_HIGH - ProblemSet.VEL_LOW);

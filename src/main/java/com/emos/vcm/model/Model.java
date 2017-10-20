@@ -135,6 +135,8 @@ public class Model {
             for (int c = 0; c < cNum; c++) {
                 Vehicle vehicle = vehicles.get(v);
                 Cargo cargo = cargos.get(c);
+
+//                double interval =  TimeProcess.difference(vehicle.getGpsUpTime(), cargo.getPickupTime()); // 车上传GPS信息的时间与要求的提货时间之间的间隔
                 double time = vcDistance.get(v, c) / vehicle.getSpeed();    // 车从gps位置行驶到取货点所使用的时间
                 Date pickupTime = TimeProcess.add(vehicle.getGpsUpTime(), time);    // 车到达取货点的时间
                 vehicle.setPickupTime(pickupTime);

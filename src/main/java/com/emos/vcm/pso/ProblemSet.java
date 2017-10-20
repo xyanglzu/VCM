@@ -16,18 +16,17 @@ import com.emos.vcm.util.MatrixProcess;
 import org.ejml.simple.SimpleMatrix;
 
 public class ProblemSet {
-    public static final double LOC_LOW = 0;
-    public static final double LOC_HIGH = 1;
     public static final double VEL_LOW = -1;
     public static final double VEL_HIGH = 1;
     public static final double ERR_TOLERANCE = 1E-20; // the smaller the tolerance, the more accurate the result,
     // but the number of iteration is increased
     public static final double w1 = 0.5;
     public static final double w2 = 0.5;
-    public static final double phi1 = 0.25;
-    public static final double phi2 = 0.25;
-    public static final double phi3 = 0.25;
-    public static final double phi4 = 0.25;
+    public static final double phi1 = 0.1;
+    public static final double phi2 = 0.1;
+    public static final double phi3 = 0.2;
+    public static final double phi4 = 0.3;
+//    public static final double phi5 = 0.2;
 
     // rowNum 与 colNum 是原问题矩阵的维度
     public static double evaluate(Location location, Model model) {
@@ -35,18 +34,8 @@ public class ProblemSet {
         int rowNum = model.getvNum();
         int colNum = model.getcNum();
         // 判断传入的参数是否合理
-        if (rowNum * colNum == location.getLoc().length) {
-            double[][] tmp = new double[rowNum][colNum];
-            for (int i = 0; i < rowNum; i++) {
-                for (int j = 0; j < colNum; j++) {
-                    if (location.getLoc()[i * colNum + j] > 0.5) {
-                        tmp[i][j] = 1;
-                    } else {
-                        tmp[i][j] = 0;
-                    }
-                }
-            }
-            SimpleMatrix locationMatrix = new SimpleMatrix(tmp);
+        if (colNum == location.getLoc().length) {
+            SimpleMatrix locationMatrix = PSOUtility.particleToMatrix(location.getLoc(), rowNum, colNum);
 
             for (int i = 0; i < rowNum; i++) {
                 // 车必须可用
@@ -67,28 +56,64 @@ public class ProblemSet {
                     return 1e9;
                 }
             }
-
-            // 每个货物只能匹配一辆车
-            SimpleMatrix vehicleNum = MatrixProcess.sumByColumn(locationMatrix);
-            for (int j = 0; j < colNum; j++) {
-                if (vehicleNum.get(0, j) > 1) {
-                    return 1e9;
-                }
+            double numOfVehicles = 0;
+            for (int i = 0; i < rowNum; i++) {
+                SimpleMatrix row = locationMatrix.extractVector(true, i);
+                numOfVehicles += row.elementMaxAbs();
+            }
+            if (numOfVehicles != rowNum && locationMatrix.elementSum() != colNum) {
+                return 1e9;
             }
 
+//            // 每个货物只能匹配一辆车
+//            SimpleMatrix vehicleNum = MatrixProcess.sumByColumn(locationMatrix);
+//            for (int j = 0; j < colNum; j++) {
+//                if (vehicleNum.get(0, j) > 1) {
+//                    return 1e9;
+//                }
+//            }
 
+            // 距离部分成本，并归一化
             SimpleMatrix L = new SimpleMatrix(rowNum, 1);
             for (int i = 0; i < rowNum; i++) {
                 L.set(i, 0, model.getDeliveryDistance().dot(locationMatrix.extractVector(true, i)));
             }
             SimpleMatrix D_molecule = locationMatrix.elementMult(model.getVcDistance());
-            double distancePart = phi1 * MatrixProcess.elementDiv(MatrixProcess.sumByRow(D_molecule).plus(L), MatrixProcess.sumByRow(locationMatrix)).elementSum();
+            SimpleMatrix distanceMatrix = MatrixProcess.elementDiv(MatrixProcess.sumByRow(D_molecule).plus(L), MatrixProcess.sumByRow(locationMatrix));
+            double maxDistance = distanceMatrix.elementMaxAbs();
+            double minDistance = 1e9;
+            for (int i = 0; i < distanceMatrix.numRows(); i++) {
+                if (minDistance > distanceMatrix.get(i, 0)) {
+                    minDistance = distanceMatrix.get(i, 0);
+                }
+            }
+            double distancePart = phi1 * (distanceMatrix.elementSum() - minDistance * rowNum) / (maxDistance - minDistance + 1);
 
-            double waitTimePart = phi2 * locationMatrix.elementMult(model.getWaitTime()).elementSum();
+            // 等待时间部分成本，并归一化
+            SimpleMatrix waitTimeMatrix = locationMatrix.elementMult(model.getWaitTime());
+            double maxWaitTime = waitTimeMatrix.elementMaxAbs();
+            double minWaitTime = 1e9;
+            for (int i = 0; i < waitTimeMatrix.numRows(); i++) {
+                if (minWaitTime > waitTimeMatrix.get(i, 0)) {
+                    minWaitTime = waitTimeMatrix.get(i, 0);
+                }
+            }
+            double waitTimePart = phi2 * (waitTimeMatrix.elementSum() - minWaitTime * rowNum) / (maxWaitTime - minWaitTime + 1);
 
-            double delayTimePart = phi3 * locationMatrix.elementMult(model.getDelayTime()).elementSum();
+            // 延误时间部分成本，并归一化
+            SimpleMatrix delayTimeMatrix = locationMatrix.elementMult(model.getDelayTime());
+            double maxDelayTime = delayTimeMatrix.elementMaxAbs();
+            double minDelayTime = 0;
+            for (int i = 0; i < delayTimeMatrix.numRows(); i++) {
+                if (minDelayTime > delayTimeMatrix.get(i, 0)) {
+                    minDelayTime = delayTimeMatrix.get(i, 0);
+                }
+            }
+            double delayTimePart = phi3 * (delayTimeMatrix.elementSum() - minDelayTime * rowNum) / (maxDelayTime - minDelayTime + 1);
 
             double loadingRatePart = 0;
+            double maxLoading = 0;
+            double minLoading = 1e9;
             for (int i = 0; i < rowNum; i++) {
                 Vehicle vehicle = model.getVehicles().get(i);
                 double P = vehicle.getMaxWeight();
@@ -107,21 +132,27 @@ public class ProblemSet {
 
                 if (weightRate > volumeRate) {
                     loadingRatePart += weightRate;
+                    if (maxLoading < weightRate) {
+                        maxLoading = weightRate;
+                    }
+                    if (minLoading > weightRate) {
+                        minLoading = weightRate;
+                    }
                 } else {
                     loadingRatePart += volumeRate;
+                    if (maxLoading < volumeRate) {
+                        maxLoading = volumeRate;
+                    }
+                    if (minLoading > volumeRate) {
+                        minLoading = volumeRate;
+                    }
                 }
-            }
-            loadingRatePart = phi4 / (loadingRatePart + 1);
+                loadingRatePart = (loadingRatePart - minLoading * rowNum) / (maxLoading - minLoading + 1);
+                loadingRatePart = phi4 / (loadingRatePart + 1);
 
-            double numOfVehicles = 0;
-            for (int i = 0; i < rowNum; i++) {
-                SimpleMatrix row = locationMatrix.extractVector(true, i);
-                numOfVehicles += row.elementMaxAbs();
+                result = w1 * (distancePart + waitTimePart + delayTimePart + loadingRatePart) + w2 * numOfVehicles;
             }
-
-            result = w1 * (distancePart + waitTimePart + delayTimePart + loadingRatePart) + w2 * numOfVehicles;
         }
-
         return result;
     }
 }

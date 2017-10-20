@@ -31,7 +31,11 @@ public class MatrixProcess {
 
             for (int i = 0; i < numRow; i++) {
                 for (int j = 0; j < numCol; j++) {
-                    result.set(i, j, matrix1.get(i, j) / matrix2.get(i, j));
+                    if (matrix2.get(i, j) == 0) {
+                        result.set(i, j, 0);
+                    } else {
+                        result.set(i, j, matrix1.get(i, j) / matrix2.get(i, j));
+                    }
                 }
             }
             return result;

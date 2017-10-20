@@ -19,9 +19,13 @@
     <orderEntry type="library" name="Maven: org.apache.xmlbeans:xmlbeans:2.6.0" level="project" />
     <orderEntry type="library" name="Maven: stax:stax-api:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.virtuald:curvesapi:1.04" level="project" />
-    <orderEntry type="library" name="Maven: com.googlecode.efficient-java-matrix-library:ejml:0.25" level="project" />
     <orderEntry type="library" name="Maven: org.ejml:ejml-core:0.32" level="project" />
     <orderEntry type="library" name="Maven: org.ejml:ejml-ddense:0.32" level="project" />
+    <orderEntry type="library" name="Maven: org.ejml:ejml-zdense:0.32" level="project" />
+    <orderEntry type="library" name="Maven: org.ejml:ejml-fdense:0.32" level="project" />
+    <orderEntry type="library" name="Maven: org.ejml:ejml-cdense:0.32" level="project" />
     <orderEntry type="library" name="Maven: org.ejml:ejml-dsparse:0.32" level="project" />
+    <orderEntry type="library" name="Maven: org.ejml:ejml-all:0.32" level="project" />
+    <orderEntry type="library" name="Maven: org.ejml:ejml-simple:0.32" level="project" />
   </component>
 </module>
