@@ -5,7 +5,6 @@ package com.emos.vcm.pso;
 // but you can easily modify it to solve higher dimensional space problem
 
 import com.emos.vcm.model.Model;
-import org.ejml.simple.SimpleMatrix;
 
 import java.util.Random;
 import java.util.Vector;
@@ -85,24 +84,33 @@ public class PSOProcess implements PSOConstants {
             err = ProblemSet.evaluate(gBestLocation, model) - 0; // minimizing the functions means it's getting closer to 0
 
             double[] gBestArray = gBestLocation.getLoc();
-            SimpleMatrix gBestMatrix = PSOUtility.particleToMatrix(gBestArray, model.getvNum(), model.getcNum());
             System.out.println("ITERATION " + t + ": ");
-            gBestMatrix.print();
+            for (int i = 0; i < gBestArray.length; i++) {
+                System.out.print((int) gBestArray[i] + " ");
+            }
+            System.out.println();
+            ProblemSet.printParameter(gBestLocation, model);
             System.out.println("     Error: " + err);
             System.out.println("     Value: " + ProblemSet.evaluate(gBestLocation, model));
             System.out.println();
 
             t++;
             updateFitnessList(model);
+
+//            if ((t >= 10 && Math.abs(gBest - fitnessValueList[t-10]) >= ProblemSet.ERR_TOLERANCE)) {
+//                break;
+//            }
         }
 
+        // 最优结果
         double[] gBestArray = gBestLocation.getLoc();
-        SimpleMatrix gBestMatrix = new SimpleMatrix(1, gBestArray.length);
-        for (int i = 0; i < gBestArray.length; i++) {
-            gBestMatrix.set(0, i, Math.floor(gBestArray[i]));
-        }
         System.out.println("\nSolution found at iteration " + (t - 1) + ", the solutions is:");
-        gBestMatrix.print();
+        int index = 0;
+        for (index = 0; index < gBestArray.length - 1; index++) {
+            System.out.print((int) gBestArray[index] + " ,");
+        }
+        System.out.println((int) gBestArray[index]);
+        ProblemSet.printParameter(gBestLocation, model);
         System.out.println("     Error: " + err);
         System.out.println("     Value: " + ProblemSet.evaluate(gBestLocation, model));
         return gBestArray;

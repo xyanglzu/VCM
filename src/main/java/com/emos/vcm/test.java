@@ -1,8 +1,6 @@
 package com.emos.vcm;
 
-import org.ejml.simple.SimpleMatrix;
-
-import java.io.IOException;
+import java.util.Map;
 
 
 public class test {
@@ -60,15 +58,18 @@ public class test {
 //        SimpleMatrix tmpa = new SimpleMatrix(tmp);
 //        tmpa.print();
 
-        double[][] t = {{1, 2, 3}, {4, 5, 6}};
-        SimpleMatrix a = new SimpleMatrix(t);
-        try {
-            a.saveToFileCSV("1.csv");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        a.print();
-        a.scale(3).print();
+//        double[][] t = {{1, 2, 3}, {4, 5, 6}};
+//        SimpleMatrix a = new SimpleMatrix(t);
+//        try {
+//            a.saveToFileCSV("1.csv");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        a.print();
+//        a.scale(3).print();
 
+        Map<String, String> map = System.getenv();
+        System.out.println(map.get("PATH"));
+        System.out.println(map.get("PATH"));
     }
 }
